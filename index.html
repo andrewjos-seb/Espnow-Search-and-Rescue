@@ -1,0 +1,158 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP8266 Firebase Data</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #1c1e21;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        h1 {
+            color: #0d6efd;
+            margin-bottom: 2rem;
+        }
+        .data-card {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .data-card h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.2rem;
+            color: #6c757d;
+        }
+        .data-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #1c1e21;
+        }
+        /* --- NEW STYLE FOR ALERTS --- */
+        .alert {
+            color: #d93025; /* Red color for alert text */
+            font-weight: 900;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ResQTech🛰️</h1>
+        
+        <div class="data-card">
+            <h2>Temperature</h2>
+            <p class="data-value" id="temperature">Loading...</p>
+        </div>
+        
+        <div class="data-card">
+            <h2>Humidity</h2>
+            <p class="data-value" id="humidity">Loading...</p>
+        </div>
+        
+        <div class="data-card">
+            <h2>Gas Level</h2>
+            <p class="data-value" id="gasLevel">Loading...</p>
+        </div>
+
+        <div class="data-card">
+            <h2>Flame Status</h2>
+            <p class="data-value" id="flameStatus">Loading...</p>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // --- 1. YOUR FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwbAvPWJA9iPpJXFyb5osGHD001lT2ve0",
+            authDomain: "resqtech-929a9.firebaseapp.com",
+            databaseURL: "https://resqtech-929a9-default-rtdb.firebaseio.com",
+            projectId: "resqtech-929a9",
+            storageBucket: "resqtech-929a9.firebasestorage.app",
+            messagingSenderId: "147944644317",
+            appId: "1:147944644317:web:089abbe2e66e9a7644c534",
+            measurementId: "G-98ZX56JVS6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- 2. YOUR DATABASE REFERENCES ---
+        const temperatureRef = database.ref('/sensor_data/temperature');
+        const humidityRef = database.ref('/sensor_data/humidity');
+        const gasRef = database.ref('/sensor_data/gas_level');
+        const flameRef = database.ref('/sensor_data/flame_detected');
+
+        // --- 3. LISTEN FOR DATA CHANGES ---
+        
+        // Get temperature data
+        temperatureRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById('temperature').innerText = data + " °C";
+        }, (error) => {
+            console.error(error);
+            document.getElementById('temperature').innerText = "Error";
+        });
+
+        // Get humidity data
+        humidityRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById('humidity').innerText = data + " %";
+        }, (error) => {
+            console.error(error);
+            document.getElementById('humidity').innerText = "Error";
+        });
+        
+        // --- NEW JAVASCRIPT FOR GAS SENSOR ---
+        gasRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            document.getElementById('gasLevel').innerText = data; // Display the raw gas value
+        }, (error) => {
+            console.error(error);
+            document.getElementById('gasLevel').innerText = "Error";
+        });
+
+        // --- NEW JAVASCRIPT FOR FLAME SENSOR ---
+        flameRef.on('value', (snapshot) => {
+            const data = snapshot.val();
+            const flameElement = document.getElementById('flameStatus');
+            // Assuming 1 means flame is detected, and 0 means it's normal
+            if (data == 1) {
+                flameElement.innerText = "FLAME DETECTED!";
+                flameElement.classList.add('alert'); // Add alert style
+            } else {
+                flameElement.innerText = "Normal";
+                flameElement.classList.remove('alert'); // Remove alert style
+            }
+        }, (error) => {
+            console.error(error);
+            document.getElementById('flameStatus').innerText = "Error";
+        });
+        
+    </script>
+
+</body>
+</html>
+```
